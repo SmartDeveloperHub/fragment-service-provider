@@ -107,7 +107,7 @@ class FragmentApp(Flask):
         """
 
         while True:
-            gen = collect_fragment(self._stop_event, self.config['PROVIDER'])
+            gen = collect_fragment(self._stop_event, **self.config['PROVIDER'])
             for collector, (t, s, p, o) in gen:
                 for task in _batch_tasks:
                     task(collector, (t, s, p, o), self._stop_event)

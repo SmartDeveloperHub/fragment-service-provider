@@ -24,11 +24,9 @@
 
 __author__ = 'Fernando Serena'
 
-from sdh.curator.client import get_fragment_generator
-from rdflib import RDF, RDFS
 import logging
-from rdflib import Literal
-import time
+
+from sdh.curator.client import get_fragment_generator
 
 __triple_patterns = {}
 __plan_patterns = {}
@@ -66,37 +64,13 @@ def add_triple_pattern(tp, collector, args):
         __triple_patterns[tp].add((collector, args))
 
 
-# def __extract_pattern_nodes(graph):
-#     """
-#     Extract and bind the triple patterns contained in the search plan, so as to be able to identify
-#     to which pattern is associated each triple of the fragment.
-#     :return:
-#     """
-#     tp_nodes = graph.subjects(RDF.type, AGORA.TriplePattern)
-#     for tpn in tp_nodes:
-#         subject = list(graph.objects(tpn, AGORA.subject)).pop()
-#         predicate = list(graph.objects(tpn, AGORA.predicate)).pop()
-#         obj = list(graph.objects(tpn, AGORA.object)).pop()
-#         subject_str = list(graph.objects(subject, RDFS.label)).pop().toPython()
-#         predicate_str = graph.qname(predicate)
-#         if (obj, RDF.type, AGORA.Variable) in graph:
-#             object_str = list(graph.objects(obj, RDFS.label)).pop().toPython()
-#         else:
-#             object_str = list(graph.objects(obj, AGORA.value)).pop().toPython()
-#         __plan_patterns[tpn] = '{} {} {}'.format(subject_str, predicate_str, object_str)
-
-
-def collect_fragment(event, provider_host):
+def collect_fragment(event, **kwargs):
     """
     Execute a search plan for the declared graph pattern and sends all obtained triples to the corresponding
     collector functions (config
     """
 
-    # graph_pattern = ""
-    # for tp in __triple_patterns:
-    #     graph_pattern += '{} . '.format(tp)
-
-    prefixes, gen = get_fragment_generator(*__triple_patterns, host=provider_host, wait=True)
+    prefixes, gen = get_fragment_generator(*__triple_patterns, wait=True, **kwargs)
     log.info('querying ' + str(__triple_patterns))
 
     for headers, quad in gen:
@@ -110,4 +84,4 @@ def collect_fragment(event, provider_host):
             if event.isSet():
                 raise Exception('Abort collecting fragment')
             yield (c.func_name, (t, s, p, o))
-        # time.sleep(0.01)
+            # time.sleep(0.01)
