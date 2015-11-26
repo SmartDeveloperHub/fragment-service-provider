@@ -143,15 +143,18 @@ class FragmentApp(Flask):
         @wraps(f)
         def wrapper():
             mimes = get_accept()
-            if 'application/json' in mimes:
+            if 'text/turtle' in mimes:
+                graph = self.__rdfizers[f.func_name](f.func_name)
+                if graph:
+                    response = make_response(graph.serialize(format='turtle'))
+                    response.headers['Content-Type'] = 'text-turtle'
+                    return response
+                raise APIError('Cannot return a graph')
+            else:
                 args, kwargs = self.__handlers[f.func_name](request)
                 context, data = f(*args, **kwargs)
                 response_dict = {'context': context, 'result': data}
                 return jsonify(response_dict)
-            else:
-                response = make_response(self.__rdfizers[f.func_name](f.func_name).serialize(format='turtle'))
-                response.headers['Content-Type'] = 'text-turtle'
-                return response
 
         return wrapper
 
