@@ -70,7 +70,7 @@ def collect_fragment(event, **kwargs):
     collector functions (config
     """
 
-    prefixes, gen = get_fragment_generator(*__triple_patterns, wait=True, **kwargs)
+    prefixes, gen = get_fragment_generator(*__triple_patterns, stop_event=event, wait=True, **kwargs)
     log.info('querying ' + str(__triple_patterns))
 
     for headers, quad in gen:
@@ -81,7 +81,8 @@ def collect_fragment(event, **kwargs):
             log.debug('Sending triple {} {} {} to {}'.format(s.n3(), p.n3(),
                                                              o.n3(), c))
             c((s, p, o))
-            if event.isSet():
-                raise Exception('Abort collecting fragment')
             yield (c.func_name, (t, s, p, o))
-            # time.sleep(0.01)
+    if event.isSet():
+        raise Exception('Abort collecting fragment')
+
+    log.debug('finished with ' + str(__triple_patterns))
