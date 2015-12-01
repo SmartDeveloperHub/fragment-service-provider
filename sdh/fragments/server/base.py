@@ -30,9 +30,10 @@ from sdh.fragments.jobs.collect import collect_fragment
 from threading import Thread, Event
 import time
 import pytz
+import logging
 
 _batch_tasks = []
-
+log = logging.getLogger('sdh.fragments.provider')
 
 def get_accept():
     return str(request.accept_mimetypes).split(',')
@@ -106,16 +107,17 @@ class FragmentApp(Flask):
         :return:
         """
 
-        while True:
-            gen = collect_fragment(self._stop_event, **self.config['PROVIDER'])
-            for collector, (t, s, p, o) in gen:
+        try:
+            while True:
+                gen = collect_fragment(self._stop_event, **self.config['PROVIDER'])
+                for collector, (t, s, p, o) in gen:
+                    for task in _batch_tasks:
+                        task(collector, (t, s, p, o), self._stop_event)
                 for task in _batch_tasks:
-                    task(collector, (t, s, p, o), self._stop_event)
-                if self._stop_event.isSet():
-                    return
-            for task in _batch_tasks:
-                task(None, None, self._stop_event)
-            time.sleep(3600)
+                    task(None, None, self._stop_event)
+                self._stop_event.wait(3600)
+        except Exception, e:
+            log.info(e.message)
 
     def run(self, host=None, port=None, debug=None, **options):
         """
