@@ -27,6 +27,7 @@ __author__ = 'Fernando Serena'
 from flask import Flask, jsonify, request, make_response
 from functools import wraps
 from sdh.fragments.jobs.collect import collect_fragment
+from sdh.fragments.jobs.query import execute_queries
 from threading import Thread, Event
 import time
 import pytz
@@ -109,6 +110,10 @@ class FragmentApp(Flask):
 
         try:
             while True:
+                gen = execute_queries(self._stop_event, **self.config['PROVIDER'])
+                for listener, result in gen:
+                    for task in _batch_tasks:
+                        task(listener, result, self._stop_event)
                 gen = collect_fragment(self._stop_event, **self.config['PROVIDER'])
                 for collector, (t, s, p, o) in gen:
                     for task in _batch_tasks:
