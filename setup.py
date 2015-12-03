@@ -28,14 +28,14 @@ from setuptools import setup, find_packages
 
 setup(
     name="Fragment-Service-Provider",
-    version="0.0.2",
+    version="0.0.4",
     author="Fernando Serena",
     author_email="fernando.serena@centeropenmiddleware.com",
     description="A library for making web services built on the SDH Fragment Provider",
     license="Apache 2",
     keywords=["linked-data", "path", "ontology", "plan"],
     url="https://github.com/smartdeveloperhub/fragment-service-provider",
-    download_url="https://github.com/smartdeveloperhub/fragment-service-provider/tarball/0.0.1",
+    download_url="https://github.com/smartdeveloperhub/fragment-service-provider/tarball/0.0.4",
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
     namespace_packages=['sdh', 'sdh.fragments'],
     install_requires=['flask', 'rdflib', 'sdh-curator-py', 'SPARQLWrapper==1.7.2'],

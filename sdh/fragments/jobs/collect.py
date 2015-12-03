@@ -31,7 +31,7 @@ from sdh.curator.client import get_fragment_generator
 __triple_patterns = {}
 __plan_patterns = {}
 
-log = logging.getLogger('sdh.fragments.provider')
+log = logging.getLogger('sdh.fragments.provider.collect')
 
 
 def collect(tp, *args):
@@ -66,8 +66,8 @@ def add_triple_pattern(tp, collector, args):
 
 def collect_fragment(event, **kwargs):
     """
-    Execute a search plan for the declared graph pattern and sends all obtained triples to the corresponding
-    collector functions (config
+    Execute a search plan for the declared graph pattern and send all obtained triples to the corresponding
+    collector functions
     """
 
     prefixes, gen = get_fragment_generator(*__triple_patterns, stop_event=event, wait=True, **kwargs)
@@ -82,6 +82,8 @@ def collect_fragment(event, **kwargs):
                                                              o.n3(), c))
             c((s, p, o))
             yield (c.func_name, (t, s, p, o))
+        if event.isSet():
+            break
     if event.isSet():
         raise Exception('Abort collecting fragment')
 
