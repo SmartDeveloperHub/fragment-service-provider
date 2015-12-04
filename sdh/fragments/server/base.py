@@ -77,6 +77,11 @@ class Conflict(APIError):
         super(Conflict, self).__init__(message, 409, payload)
 
 
+def _handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
+
 class FragmentApp(Flask):
     """
     Provider base class for the Fragment-based services
@@ -91,15 +96,10 @@ class FragmentApp(Flask):
         super(FragmentApp, self).__init__(name)
         self.__handlers = {}
         self.__rdfizers = {}
-        self.errorhandler(self.__handle_invalid_usage)
         self.config.from_object(config_class)
         self._stop_event = Event()
-
-    @staticmethod
-    def __handle_invalid_usage(error):
-        response = jsonify(error.to_dict())
-        response.status_code = error.status_code
-        return response
+        self.__refresh_rate = self.config.get('PARAMS', {}).get('rate', 3600)
+        self.errorhandler(APIError)(_handle_invalid_usage)
 
     def batch_work(self):
         """
@@ -120,7 +120,7 @@ class FragmentApp(Flask):
                         task(collector, (t, s, p, o), self._stop_event)
                 for task in _batch_tasks:
                     task(None, None, self._stop_event)
-                self._stop_event.wait(3600)
+                self._stop_event.wait(self.__refresh_rate)
         except Exception, e:
             log.info(e.message)
 
