@@ -71,7 +71,7 @@ def collect_fragment(event, **kwargs):
     """
 
     prefixes, gen = get_fragment_generator(*__triple_patterns, stop_event=event, wait=True, **kwargs)
-    log.info('querying ' + str(__triple_patterns))
+    log.info('pulling ' + str(__triple_patterns))
 
     for headers, quad in gen:
         t, s, p, o = quad

@@ -33,7 +33,8 @@ import time
 import pytz
 import logging
 
-_batch_tasks = []
+_triggers = []
+_finishers = []
 log = logging.getLogger('sdh.fragments.provider')
 
 def get_accept():
@@ -98,7 +99,7 @@ class FragmentApp(Flask):
         self.__rdfizers = {}
         self.config.from_object(config_class)
         self._stop_event = Event()
-        self.__refresh_rate = self.config.get('PARAMS', {}).get('rate', 3600)
+        self.__refresh_rate = int(self.config.get('PARAMS', {}).get('rate', 3600))
         self.errorhandler(APIError)(_handle_invalid_usage)
 
     def batch_work(self):
@@ -112,14 +113,14 @@ class FragmentApp(Flask):
             while True:
                 gen = execute_queries(self._stop_event, **self.config['PROVIDER'])
                 for listener, result in gen:
-                    for task in _batch_tasks:
+                    for task in _triggers:
                         task(listener, result, self._stop_event)
                 gen = collect_fragment(self._stop_event, **self.config['PROVIDER'])
                 for collector, (t, s, p, o) in gen:
-                    for task in _batch_tasks:
+                    for task in _triggers:
                         task(collector, (t, s, p, o), self._stop_event)
-                for task in _batch_tasks:
-                    task(None, None, self._stop_event)
+                for task in _finishers:
+                    task(self._stop_event)
                 self._stop_event.wait(self.__refresh_rate)
         except Exception, e:
             log.info(e.message)
@@ -129,10 +130,15 @@ class FragmentApp(Flask):
         Start the AgoraApp expecting the provided config to have at least REDIS and PORT fields.
         """
 
-        tasks = options.get('tasks', [])
+        tasks = options.get('triggers', [])
         for task in tasks:
             if task is not None and hasattr(task, '__call__'):
-                _batch_tasks.append(task)
+                _triggers.append(task)
+
+        finishers = options.get('finishers', [])
+        for task in finishers:
+            if task is not None and hasattr(task, '__call__'):
+                _finishers.append(task)
 
         thread = Thread(target=self.batch_work)
         thread.start()
