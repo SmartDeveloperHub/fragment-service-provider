@@ -29,7 +29,7 @@ from functools import wraps
 from sdh.fragments.jobs.collect import collect_fragment
 from sdh.fragments.jobs.query import execute_queries
 from threading import Thread, Event
-import time
+import traceback
 import pytz
 import logging
 
@@ -123,7 +123,8 @@ class FragmentApp(Flask):
                     task(self._stop_event)
                 self._stop_event.wait(self.__refresh_rate)
         except Exception, e:
-            log.info(e.message)
+            traceback.print_exc()
+            log.error(e.message)
 
     def run(self, host=None, port=None, debug=None, **options):
         """
