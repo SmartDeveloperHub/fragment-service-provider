@@ -70,10 +70,7 @@ def execute_queries(event, **kwargs):
     """
 
     for gp in __graph_patterns:
-        prefixes, gen = get_query_generator(*eval(gp), stop_event=event, wait=True, exchange='sdh',
-                                            topic_pattern='scholar.request',
-                                            response_prefix='scholar.response',
-                                            **kwargs)
+        prefixes, gen = get_query_generator(*eval(gp), stop_event=event, wait=True, **kwargs)
         log.info('querying ' + str(__graph_patterns))
 
         for headers, res in gen:
