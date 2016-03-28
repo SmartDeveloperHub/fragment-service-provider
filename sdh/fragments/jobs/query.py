@@ -51,7 +51,7 @@ def query(gp, *args):
 def add_query_pattern(gp, listener, args):
     """
     Manage the relations between triple patterns and query functions
-    :param tp:
+    :param gp:
     :param listener:
     :param args:
     :return:
@@ -70,7 +70,10 @@ def execute_queries(event, **kwargs):
     """
 
     for gp in __graph_patterns:
-        prefixes, gen = get_query_generator(*eval(gp), stop_event=event, wait=True, **kwargs)
+        prefixes, gen = get_query_generator(*eval(gp), stop_event=event, wait=True, exchange='sdh',
+                                            topic_pattern='scholar.request',
+                                            response_prefix='scholar.response',
+                                            **kwargs)
         log.info('querying ' + str(__graph_patterns))
 
         for headers, res in gen:

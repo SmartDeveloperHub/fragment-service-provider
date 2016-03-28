@@ -70,7 +70,10 @@ def collect_fragment(event, **kwargs):
     collector functions
     """
 
-    prefixes, gen = get_fragment_generator(*__triple_patterns, stop_event=event, wait=True, **kwargs)
+    prefixes, gen = get_fragment_generator(*__triple_patterns, stop_event=event, wait=True,
+                                           exchange='sdh', topic_pattern='scholar.request',
+                                           response_prefix='scholar.response',
+                                           **kwargs)
     log.info('pulling ' + str(__triple_patterns))
 
     for headers, quad in gen:
