@@ -26,7 +26,7 @@ __author__ = 'Fernando Serena'
 
 import logging
 
-from sdh.curator.client import get_fragment_generator
+from agora.stoa.client import get_fragment_generator
 
 __triple_patterns = {}
 __plan_patterns = {}
