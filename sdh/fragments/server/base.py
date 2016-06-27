@@ -111,11 +111,11 @@ class FragmentApp(Flask):
 
         try:
             while True:
-                gen = execute_queries(self._stop_event, **self.config['PROVIDER'])
+                gen = execute_queries(self._stop_event, **{'STOA': self.config['PROVIDER']})
                 for listener, result in gen:
                     for task in _triggers:
                         task(listener, result, self._stop_event)
-                gen = collect_fragment(self._stop_event, **self.config['PROVIDER'])
+                gen = collect_fragment(self._stop_event, **{'STOA': self.config['PROVIDER']})
                 for collector, (t, s, p, o) in gen:
                     for task in _triggers:
                         task(collector, (t, s, p, o), self._stop_event)

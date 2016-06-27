@@ -28,7 +28,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="Fragment-Service-Provider",
-    version="0.1.0",
+    version="0.1.1",
     author="Fernando Serena",
     author_email="fernando.serena@centeropenmiddleware.com",
     description="A library for making web services built on the SDH Fragment Provider",

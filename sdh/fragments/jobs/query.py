@@ -69,21 +69,20 @@ def execute_queries(event, **kwargs):
     functions
     """
 
-    extra_params = {'STOA': kwargs}
-
     for gp in __graph_patterns:
-        prefixes, gen = get_query_generator(*eval(gp), stop_event=event, wait=True, **extra_params)
+        prefixes, gen = get_query_generator(*eval(gp), stop_event=event, wait=True, **kwargs)
         log.info('querying ' + str(__graph_patterns))
 
-        for headers, res in gen:
-            print headers, res
-            listeners = __graph_patterns[gp]
-            for c, args in listeners:
-                log.debug('Sending result {} to {}'.format(res, c))
-                c(res)
-                yield (c.func_name, res)
-            if event.isSet():
-                break
+        if gen is not None:
+            for headers, res in gen:
+                print headers, res
+                listeners = __graph_patterns[gp]
+                for c, args in listeners:
+                    log.debug('Sending result {} to {}'.format(res, c))
+                    c(res)
+                    yield (c.func_name, res)
+                if event.isSet():
+                    break
         if event.isSet():
             raise Exception('Abort getting query results')
 

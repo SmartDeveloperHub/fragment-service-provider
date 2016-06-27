@@ -70,22 +70,21 @@ def collect_fragment(event, **kwargs):
     collector functions
     """
 
-    extra_params = {'STOA': kwargs}
-
-    prefixes, gen = get_fragment_generator(*__triple_patterns, stop_event=event, wait=True, **extra_params)
+    prefixes, gen = get_fragment_generator(*__triple_patterns, stop_event=event, wait=True, **kwargs)
     log.info('pulling ' + str(__triple_patterns))
 
-    for headers, quad in gen:
-        t, s, p, o = quad
-        t = ' '.join(t)
-        collectors = __triple_patterns[t]
-        for c, args in collectors:
-            log.debug('Sending triple {} {} {} to {}'.format(s.n3(), p.n3(),
-                                                             o.n3(), c))
-            c((s, p, o))
-            yield (c.func_name, (t, s, p, o))
-        if event.isSet():
-            break
+    if gen is not None:
+        for headers, quad in gen:
+            t, s, p, o = quad
+            t = ' '.join(t)
+            collectors = __triple_patterns[t]
+            for c, args in collectors:
+                log.debug('Sending triple {} {} {} to {}'.format(s.n3(), p.n3(),
+                                                                 o.n3(), c))
+                c((s, p, o))
+                yield (c.func_name, (t, s, p, o))
+            if event.isSet():
+                break
     if event.isSet():
         raise Exception('Abort collecting fragment')
 
