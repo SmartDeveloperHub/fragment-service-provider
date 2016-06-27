@@ -70,7 +70,9 @@ def collect_fragment(event, **kwargs):
     collector functions
     """
 
-    prefixes, gen = get_fragment_generator(*__triple_patterns, stop_event=event, wait=True, **kwargs)
+    extra_params = {'STOA': kwargs}
+
+    prefixes, gen = get_fragment_generator(*__triple_patterns, stop_event=event, wait=True, **extra_params)
     log.info('pulling ' + str(__triple_patterns))
 
     for headers, quad in gen:

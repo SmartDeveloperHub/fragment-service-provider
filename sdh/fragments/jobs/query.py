@@ -69,8 +69,10 @@ def execute_queries(event, **kwargs):
     functions
     """
 
+    extra_params = {'STOA': kwargs}
+
     for gp in __graph_patterns:
-        prefixes, gen = get_query_generator(*eval(gp), stop_event=event, wait=True, **kwargs)
+        prefixes, gen = get_query_generator(*eval(gp), stop_event=event, wait=True, **extra_params)
         log.info('querying ' + str(__graph_patterns))
 
         for headers, res in gen:
